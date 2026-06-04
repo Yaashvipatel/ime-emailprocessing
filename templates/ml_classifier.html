@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block title %}ML Classifier — IME{% endblock %}
+{% block tb_title %}ML Classifier{% endblock %}
+{% block tb_sub %}scikit-learn TF-IDF Classification Model{% endblock %}
+{% block content %}
+<style>
+.cm-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:12px;}
+.cm-cell{padding:14px 8px;text-align:center;border-radius:4px;font-family:var(--mono);font-size:13px;font-weight:600;}
+.cm-header{background:var(--elevated);color:var(--t3);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
+.cm-row-label{background:var(--elevated);color:var(--t2);font-size:11px;text-align:right;padding-right:12px;}
+.cm-val-high{background:rgba(20,184,166,.25);color:#14B8A6;}
+.cm-val-mid{background:rgba(59,130,246,.15);color:#60A5FA;}
+.cm-val-low{background:rgba(99,119,160,.1);color:var(--t3);}
+.feat-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.feat-word{font-family:var(--mono);font-size:12px;color:var(--t1);width:120px;flex-shrink:0;}
+.feat-bar-wrap{flex:1;height:5px;background:var(--elevated);border-radius:2px;}
+.feat-bar{height:100%;border-radius:2px;transition:width .8s ease;}
+.feat-score{font-size:11px;font-family:var(--mono);color:var(--t3);width:40px;text-align:right;}
+.class-card{background:var(--elevated);border:1px solid var(--border);border-radius:8px;padding:16px;}
+.metric-row{display:flex;justify-content:space-between;margin-bottom:8px;}
+.metric-val{font-size:20px;font-weight:700;}
+.metric-lbl{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;}
+.acc-hero{text-align:center;padding:24px;background:linear-gradient(135deg,rgba(20,184,166,.1),rgba(59,130,246,.1));border-radius:12px;border:1px solid var(--accent);margin-bottom:20px;}
+.acc-number{font-size:64px;font-weight:700;background:linear-gradient(135deg,#14B8A6,#3B82F6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;}
+.cv-scores{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:8px;}
+.cv-chip{padding:3px 10px;border-radius:4px;font-size:12px;font-family:var(--mono);background:var(--elevated);color:var(--t2);border:1px solid var(--border);}
+</style>
+
+<div class="ph">
+  <div class="ph-row">
+    <div>
+      <h1>ML Classifier</h1>
+      <p>scikit-learn TF-IDF + Logistic Regression — trained on real maritime email corpus</p>
+    </div>
+    <button class="btn btn-p" onclick="retrainModel()" id="train-btn">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+      Retrain Model
+    </button>
+  </div>
+</div>
+
+{% if metrics and metrics.model_ready %}
+<!-- ACCURACY HERO -->
+<div class="acc-hero">
+  <div class="acc-number">{{ (metrics.accuracy * 100)|round|int }}%</div>
+  <div style="font-size:16px;font-weight:600;color:var(--t1);margin-top:4px;">Classification Accuracy</div>
+  <div style="font-size:13px;color:var(--t2);margin-top:4px;">{{ metrics.training_samples }} training samples · 5-fold cross-validation</div>
+  <div class="cv-scores">
+    {% for s in metrics.cv_scores %}<span class="cv-chip">{{ (s*100)|round|int }}%</span>{% endfor %}
+    <span class="cv-chip" style="background:var(--accent-d);color:var(--accent);border-color:rgba(20,184,166,.3)">±{{ (metrics.cv_std*100)|round(1) }}% std</span>
+  </div>
+</div>
+
+<div class="g2 mb16">
+  <!-- PER-CLASS METRICS -->
+  <div class="card">
+    <div class="card-hd"><span class="card-ttl">Per-Class Performance</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+      {% for cls in ['tonnage','cargo_vc','cargo_tc'] %}
+      {% set m = metrics.per_class[cls] %}
+      {% set colors = {'tonnage':'#3B82F6','cargo_vc':'#10B981','cargo_tc':'#F59E0B'} %}
+      {% set labels = {'tonnage':'Tonnage','cargo_vc':'Cargo VC','cargo_tc':'Cargo TC'} %}
+      <div class="class-card" style="border-top:2px solid {{ colors[cls] }}">
+        <div style="font-size:12px;font-weight:600;color:{{ colors[cls] }};margin-bottom:12px;">{{ labels[cls] }}</div>
+        <div class="metric-row"><div><div class="metric-val" style="color:{{ colors[cls] }}">{{ (m.precision*100)|round|int }}%</div><div class="metric-lbl">Precision</div></div><div style="text-align:right"><div class="metric-val">{{ (m.recall*100)|round|int }}%</div><div class="metric-lbl">Recall</div></div></div>
+        <div style="margin-top:10px;text-align:center">
+          <div style="font-size:22px;font-weight:700;color:var(--accent)">{{ (m.f1*100)|round|int }}%</div>
+          <div class="metric-lbl">F1 Score</div>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:var(--t3);text-align:center">{{ m.support }} samples</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- CONFUSION MATRIX -->
+  <div class="card">
+    <div class="card-hd"><span class="card-ttl">Confusion Matrix</span></div>
+    <div style="font-size:11px;color:var(--t3);margin-bottom:8px;">Predicted →</div>
+    <div class="cm-grid">
+      <div class="cm-cell cm-header"></div>
+      <div class="cm-cell cm-header">Tonnage</div>
+      <div class="cm-cell cm-header">Cargo VC</div>
+      <div class="cm-cell cm-header">Cargo TC</div>
+      {% for row in metrics.confusion_matrix %}{% set i = loop.index0 %}
+      {% set row_labels = ['Tonnage','Cargo VC','Cargo TC'] %}
+      <div class="cm-cell cm-row-label">{{ row_labels[i] }}</div>
+      {% for val in row %}{% set j = loop.index0 %}
+      <div class="cm-cell {% if i==j %}cm-val-high{% elif val>0 %}cm-val-mid{% else %}cm-val-low{% endif %}">{{ val }}</div>
+      {% endfor %}
+      {% endfor %}
+    </div>
+    <div style="margin-top:12px;font-size:11px;color:var(--t3);">
+      Diagonal = correct predictions · Off-diagonal = misclassifications
+    </div>
+  </div>
+</div>
+
+<!-- TOP FEATURES PER CLASS -->
+<div class="card">
+  <div class="card-hd"><span class="card-ttl">Top Discriminative Features (TF-IDF Weights)</span></div>
+  <div class="g3">
+    {% for cls in ['tonnage','cargo_vc','cargo_tc'] %}
+    {% set feat_colors = {'tonnage':'#3B82F6','cargo_vc':'#10B981','cargo_tc':'#F59E0B'} %}
+    {% set cls_labels = {'tonnage':'Tonnage Keywords','cargo_vc':'Cargo VC Keywords','cargo_tc':'Cargo TC Keywords'} %}
+    <div>
+      <div style="font-size:12px;font-weight:600;color:{{ feat_colors[cls] }};margin-bottom:12px;">{{ cls_labels[cls] }}</div>
+      {% if metrics.top_features and metrics.top_features[cls] %}
+        {% set feats = metrics.top_features[cls][:10] %}
+        {% set max_w = feats[0].weight if feats else 1 %}
+        {% for f in feats %}
+        <div class="feat-row">
+          <span class="feat-word">{{ f.word }}</span>
+          <div class="feat-bar-wrap"><div class="feat-bar" style="width:{{ [((f.weight/max_w)*100)|round|int, 0]|max }}%;background:{{ feat_colors[cls] }}"></div></div>
+          <span class="feat-score">{{ f.weight|round(2) }}</span>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="card mt16">
+  <div class="card-hd"><span class="card-ttl">Model Details</span></div>
+  <div class="g3">
+    <div><div style="font-size:11px;color:var(--t3)">Algorithm</div><div style="font-size:14px;font-weight:600;margin-top:4px">TF-IDF + Logistic Regression</div></div>
+    <div><div style="font-size:11px;color:var(--t3)">N-gram Range</div><div style="font-size:14px;font-weight:600;margin-top:4px">Unigram + Bigram (1,2)</div></div>
+    <div><div style="font-size:11px;color:var(--t3)">Max Features</div><div style="font-size:14px;font-weight:600;margin-top:4px">3,000 vocabulary</div></div>
+    <div><div style="font-size:11px;color:var(--t3)">Validation</div><div style="font-size:14px;font-weight:600;margin-top:4px">5-fold stratified CV</div></div>
+    <div><div style="font-size:11px;color:var(--t3)">Training Samples</div><div style="font-size:14px;font-weight:600;margin-top:4px">{{ metrics.training_samples }}</div></div>
+    <div><div style="font-size:11px;color:var(--t3)">Last Trained</div><div style="font-size:14px;font-weight:600;margin-top:4px">{{ metrics.trained_at[:16] if metrics.trained_at else 'N/A' }}</div></div>
+  </div>
+</div>
+
+{% else %}
+<div class="card">
+  <div class="empty">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
+    <h3>Model Not Trained</h3>
+    <p>Load sample data first, then click Retrain Model to see accuracy metrics.</p>
+    <button class="btn btn-p" style="margin-top:16px" onclick="retrainModel()">Train Now</button>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script>
+function retrainModel(){
+  const btn=document.getElementById('train-btn');
+  btn.textContent='Training…';btn.disabled=true;
+  toast('Training ML model…','info');
+  fetch('/api/ml-train',{method:'POST'}).then(r=>r.json()).then(d=>{
+    toast(`Model trained! Accuracy: ${Math.round(d.accuracy*100)}%`,'success');
+    setTimeout(()=>location.reload(),1200);
+  }).catch(()=>{toast('Training failed','error');btn.textContent='Retrain Model';btn.disabled=false;});
+}
+</script>
+{% endblock %}

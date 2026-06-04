@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Vessel Database — IME{% endblock %}
+{% block tb_title %}Vessel Database{% endblock %}
+{% block tb_sub %}Open position tonnage records{% endblock %}
+{% block content %}
+<div class="ph">
+  <div class="ph-row">
+    <div><h1>Vessel Database</h1><p>{{ count }} open vessel records</p></div>
+    <form style="display:flex;gap:8px;" method="get">
+      <input class="fc" name="q" value="{{ search }}" placeholder="Search vessels, ports…" style="width:240px;height:36px;">
+      <button class="btn btn-s btn-sm" type="submit">Search</button>
+      {% if search %}<a href="/tonnage" class="btn btn-s btn-sm">Clear</a>{% endif %}
+    </form>
+  </div>
+</div>
+<div class="card">
+  <div class="tbl-wrap">
+    {% if rows %}
+    <table class="tbl">
+      <thead><tr><th>#</th><th>Vessel Name</th><th>DWT</th><th>Type</th><th>Open Port</th><th>Open Date</th><th>Flag</th><th>Class</th><th>Account</th><th>Conf.</th></tr></thead>
+      <tbody>
+      {% for r in rows %}
+      <tr>
+        <td class="cm" style="color:var(--t3)">{{ r.id }}</td>
+        <td><span class="cp">⚓ {{ r.vessel_name or '—' }}</span></td>
+        <td class="cm">{{ r.vessel_size_dwt or '—' }}</td>
+        <td><span class="bdg bt">{{ r.vessel_type or 'Bulk Carrier' }}</span></td>
+        <td>{{ r.open_port or '—' }}</td>
+        <td class="cm">{{ r.open_date or '—' }}</td>
+        <td>{{ r.flag or '—' }}</td>
+        <td class="cm">{{ r.classification or '—' }}</td>
+        <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ r.account_name or '—' }}</td>
+        <td><div class="cbar"><div class="ctrack"><div class="cfill" style="width:{{ r.confidence or 0 }}%;background:{% if (r.confidence or 0)>=80 %}#10B981{% elif (r.confidence or 0)>=60 %}#F59E0B{% else %}#EF4444{% endif %}"></div></div><span class="clbl">{{ r.confidence or 0 }}%</span></div></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4"/></svg><h3>No vessels found</h3><p>{% if search %}No results for "{{ search }}"{% else %}Load sample data to populate the database{% endif %}</p></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

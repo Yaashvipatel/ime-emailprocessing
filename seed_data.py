@@ -1,0 +1,411 @@
+"""
+Seed data - pre-loaded sample emails for demo
+"""
+
+SAMPLE_EMAILS = [
+    {
+        "category_hint": "tonnage",
+        "sender": "chartering@primemaritime.gr",
+        "subject": "OPEN VESSELS - PRIME MARITIME - PACIFIC",
+        "text": """Doc-No. 12940840   25/MAY/2026 (MON)  10:48  (+0300)
+
+P R I M E   M A R I T I M E   I N C. - PIRAEUS
+71, Akti Miaouli Str – 7th floor
+TEL:+30 210 4527001/2/3/4
+E-mail:chartering@primemaritime.gr
+
+DEAR SIRS
+
+GOOD DAY
+
+OUR DIRECT OWS OPEN AS FOLLOWS
+
+PLS PPSE SUIT
+
+PACIFIC
+
+=======
+
+SARONIC CHAMPION (93K – SCRUBBER FITTED / 2011 )          – OPEN VUNG ANG, VIETNAM 08-12 JUNE
+
+SARONIC CHAMPION
+LIBERIA FLAG
+BUILT 2011
+CLASS LR
+ABT 93.116 DWT ON ABT 14.90 MTRS SSW (SCANTLING)
+LOA 229.253 MTRS / BEAM 38.00 MTRS
+GRAIN CAP ABT 110.330 CBM
+7/7 HO/HA – SCRUBBER FITTED
+SPEED / CONS (INCLUDING A/E)
+BALLAST : ABT 12.75 KNOTS ON ABT 30.50 MTS IFO 380 CST + ABT 0,1 MTS LSGO
+LADEN : ABT 11.75 KNOTS ON ABT 30.50 MTS IFO 380 CST + ABT 0,1 MTS LSGO
+
+BEST REGARDS,
+GEORGE RACHIOTIS
++30 699 223 8161"""
+    },
+    {
+        "category_hint": "tonnage",
+        "sender": "vp@shipping.cn",
+        "subject": "TONNAGE LIST - PACIFIC + INDIAN OCEAN",
+        "text": """TELiX MSG: 0C7E3-00 25/05/26 10:20 +03:00
+
+/ VP
+
+good day,
+
+PLS PROPOSE FOR THE BELOW TONNAGE list:
+
+PACIFIC OCEAN
+=======================
+
+MV SHENG AN HAI DWT 56564 OPEN XIAMEN, CHINA O/A 2ND JUNE 2026
+
+MV FENG HUI HAI DWT 63260 OPEN GUANGZHOU, CHINA O/A 6TH JUNE 2026
+
+MV YUANPING SEA DWT 55646 OPEN MANILA, PHI O/A 3RD JUNE 2026
+
+MV SHENG DE HAI DWT 56721 OPEN SAMALAJU, MALAYSIA O/A 3RD JUNE 2026
+
+INDIAN OCEAN
+=======================
+
+MV YIN HUA 1 DWT 46613 OPEN CHITTAGONG, B.DESH O/A 5TH JUNE 2026
+
+MV BI JIA SHAN DWT 56623 OPEN GWADAR, PAKISTAN O/A 2ND JUNE 2026
+
+MV YUANNING SEA DWT 55580 OPEN SOHAR, OMAN O/A 30TH MAY 2026
+
+MV COS ORCHID DWT 55550 OPEN DAR ES SALAAM, TANZANIA O/A 1ST JUNE 2026
+
+VSL PARTICULAR:
+==================
+
+M/V: SHENG AN HAI
+BUILT: 2012.12
+FLAG: CHINA
+CLASS: CCS
+LOA 189.99M/ BEAM 32.26M / M.DEPTH 18M/ LBP 185M
+DWT 56564.4MT ON 12.8M SSW DRAFT-TPC 58.8
+HO/HA: 5/5
+GRAIN 71634.09CBM
+BALE 68162.27CBM
+GEARS: 4*30T (HOOK USE) OR 24T(GRAB USE)
+SPD/CONS:
+BALLAST: ABT 12.5 KNOTS ON 23 MT LSFO 380
+LADEN: ABT 12 KNOTS ON 24 MT LSFO 380
+
+--------------------------------------
+
+MV FENG HUI HAI
+2017 BLT HONG KONG FLAG SDSTBC
+63260.8 DWT ON 13.30 M SSW TPC=62.3T/CM
+LOA/BEAM 199.9/32.26M
+5 HO/5 HA
+78771.0 /73430CBM GRAIN/BALE CAPACITY
+4 X 30 TON CRANES AND 4 X12 CMB GRAB
+
+--------------------------------------
+
+MV SHENG DE HAI
+IMO NO.: 9663178 CALL SIGN: BPNY
+PORT OF REGISTRY: HAIKOU
+FLAG: PRC  CLASS: CCS
+DATE OF DELIVERY: NOVEMBER 2013
+TYPE: BULK CARRIER  NUMBER OF HATCH: 5 NUMBER OF HOLD: 5
+LOA: 189.99M LBP: 185M BREADTH: 32.26M DEPTH: 18.00M
+SUMMER DWT: 56704.2MT DRAFT: 12.8M
+
+-------------------------------
+
+MV YIN HUA 1
+2013 BLT CHINA FLAG SDBC
+CLASS: CCS
+DWT 46613 MT ON 10.90 M SSW TPC 57.7
+LOA/BEAM 189.99/32.26
+5 HO/5 HA
+60276.1 CBM GRAIN/56986.3 CBM BALE CAPACITY
+4X36T CRANE/GRAB 4X12 CBM
+
+------------------------------
+
+MV BI JIA SHAN
+HONG KONG/11, SDBC, GRABBER
+56,625 MTDW ON 12.80M SSW
+LOA/BM 189.99 / 32.26M
+GRAIN CAPAC: 71,634.09CBM
+5HO/5HA  GRABS 4 X 12.0 CBM
+CRANE 4 X 30T
+
+----------------------------------
+
+MV YUANNING SEA
+2004 BLT PANAMA FLAG SDSTBC
+55,580DWT ON 12.52M SSW TPC 56.4
+LOA/BEAM 189.94/32.26M
+5 HO/5 HA
+
+------------------
+
+MV. COS ORCHID
+DWT 55550 MT DRAFT OF 12.5 M SSW
+BUILT 2006 FEB 23 EX NANTONG-KAWASHAKI SHIPYARD
+SINGAPORE FLAG SDBC
+LOA/BEAM 189.9/32.26M
+5 HO/HA 4X30T CRANE/GRAB 4X12CUM
+
+END"""
+    },
+    {
+        "category_hint": "tonnage",
+        "sender": "chartering@primemaritime.gr",
+        "subject": "MV TRUE FRIEND - OPEN BEJAIA",
+        "text": """Doc-No. 12939935   25/MAY/2026 (MON)  08:41  (+0300)
+
+P R I M E   M A R I T I M E   I N C. - PIRAEUS
+
+GOOD DAY
+
+OUR CLOSE OWS OPEN ASF
+
+PLS PPSE SUIT
+
+MV TRUE FRIEND/51K/ 09 - BEJAIA , 1ST JUNE ONW - EX OUR CP
+
+MV TRUE FRIEND
+==============
+
+DWT: 51.241
+BUILT: 2009
+FLAG: BARBADOS
+BULK CARRIER
+CLASSIFICATION: NK
+GROSS TONNAGE (INTERNATIONAL): 30.655
+NET TONNAGE (INTERNATIONAL): 15.707
+LENGTH OVER ALL (LOA): 182.98 M
+5/5 HO/HA
+GRAIN: ABT 59,676
+CRANES: 4X30.5T
+
+SPEED/CONSUMPTION:
+ECO SP&CO
+11.0K@21.5 MT/(BALLAST) &0.25MGO
+11.0K@22.0 MT (LADEN)&0.25MGO.
+
+BEST REGARDS
+KOSTAS SOTIROPOULOS
+MOB: +30 698 03 97 728"""
+    },
+    {
+        "category_hint": "tonnage",
+        "sender": "kp@broker.gr",
+        "subject": "MV BLUE STAR 38K - OPEN GABES TUNISIA",
+        "text": """TELiX MSG: 0C2ZL-00 22/05/26 10:55 +03:00
+
+- / KP
+
+GOOD DAY,
+
+PLEASED TO HEAR.
+
+MV BLUE STAR (38K DWT) - OPEN 25 MAY GABES, TUNISIA
+
+GEARED SELF-TRIMMING SINGLE DECK BULK CARRIER
+BUILT 2011 SAMHO SHIPBUILDING CO LTD, KOREA
+LIBERIAN FLAG / CLASSED HIGHEST ABS / IMO NO 9579327
+37,947 MTDWT ON 10,63 M SSW (TPC 49,16)
+LOA 179,98 / BEAM 30,00M
+GT/NT 23.204/11.900
+5 H/H
+
+CARGO HOLDS CUBIC 48.133,5/46.689,5 CBM (GRAIN/BALE)
+
+4 X 35MT CRANES
+CO2 FITTED / ELECTRICAL VENTILATED
+BWTS FITTED (ALPHA LAVAL)
+
+SPEED AND CONSUMPTION:
+ABT 11,0 KN ON ABT 17,0 (L)/ ABT 11,5 ON ABT 16,0 (B) MT IFO + 0,2 MT MGO INCL D/G"""
+    },
+    {
+        "category_hint": "tonnage",
+        "sender": "vp@shipping.cn",
+        "subject": "TONNAGE - ECSA + W.AFRICA + CONTI+MED",
+        "text": """TELiX MSG: 0BYXM-00 21/05/26 10:30 +03:00
+
+/ VP
+
+good day,
+
+PLS PROPOSE FOR THE BELOW TONNAGE list:
+
+ECSA + W. AFRICA
+
+MV DE SHENG HAI  DWT 38,821.5 MT OPEN MUCURIPE, BRAZIL  O/A 24-25 MAY 2026
+
+CONTI+MED
+
+M/V AN DING HAI DWT 38,800 MT  - OPEN  CASABLANCA  O/A  28-30 MAY 2026
+
+VSL PARTICULAR:
+==================
+
+MV AN DING HAI
+2017 BLT HONGKONG FLAG SDBC
+IMO NO. 9751303
+38800.9 DWT ON 10.5M SSW
+TPC: 54MT ON SUMMER DRAFT
+GRAIN/BALE CAPACITY 50873.7 /49572.6 M3
+LOA/BEAM 179.95/32.00M
+GT/NT 25,622/13,063
+5 HO/5 HA
+GEAR: 4 X 30 TON CRANES, 4 X10 CBM RADIO REMOTE CONTROL GRAB
+
+ECONOMICAL SPEED ABOUT 12.5/12 KNOTS ON ABOUT 16.5/17.0 TONS LSFO (380) ON BALLAST/LADEN IN GOOD WEATHER CONDITION WOG."""
+    },
+    {
+        "category_hint": "cargo_vc",
+        "sender": "chartering@broker.com",
+        "subject": "VC CARGO - KOH SI CHANG / KANDLA+CHENNAI",
+        "text": """TELiX MSG: 09A76-00 22/05/26 13:32 +03:00
+
+22 MAY 2026
+
+ATTN CHARTERING DESK !
+
+DEAR SIR
+
+GOOD DAY
+
+PLEASE OFFER FIRM FOR FOLL FULY FIRM CARGO
+
+15,000 - 20,000 MTS 10PCT MOLOCHOPT
+LOAD PORT: KOH SI CHANG, THAILAND
+DISCHARGE PORT: KANDLA + CHENNAI
+LOAD RATE: 1,000 MTS PWWD SSHEX
+DISCHARGE RATE: 1500 MTS PWWD SSHEX
+LAYCAN: MID JULY 2026
+COM: 3.75 PCT TTL"""
+    },
+    {
+        "category_hint": "cargo_vc",
+        "sender": "lidomar@lidomar.ro",
+        "subject": "VC CARGO - JEDDAH/BILBAO HRC + IRON SLAG + UREA",
+        "text": """MCD LIDOMAR
+Att. Chartering Desk
+/Catalin
+Good day
+
+Jeddah  / Bilbao
+
+20 000  mt HRC  max 28,5 mt
+
+FIOS
+
+4000 mt fhinc / CQD disch
+
+25 June - 5 July try later
+
+3,75% here
+
+Best regards/Cristescu
+As brokers only,
+Phone: (+) 40-751-991111
+EMAIL lidomar@lidomar.ro
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+PLS OFFER FIRM FOR FOLL OUR CLOSE AND DIR CHRTRS
+
+20-30,000 mts iron slag in bulk
+LP: Bushehr
+DP: Doha
+10000/12000
+25-30 July
+3.75% TTL
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Cargo: 30,000 mts of Urea in bulk
+POL: BIk
+POD: Iskenderun or Durban
+5000/5000
+LAYCAN: 16-20 July
+COMM: 1.25% TTL"""
+    },
+    {
+        "category_hint": "cargo_tc",
+        "sender": "kp@broker.gr",
+        "subject": "TC CARGO - CHINA/NOPAC + SEASIA - DAI AN",
+        "text": """TELiX MSG: 0C2V5-00 22/05/26 10:45 +03:00
+
+- / KP
+
+GOOD DAY,
+
+PLEASED TO HEAR.
+
+CHINA / NOPAC
+ACC DAI AN OCEAN SHIPPING COMPANY LIMITED
+DELIVERY TM VANCOUVER
+LC 10-17 JUNE
+SMX-UMX, PREF UMX
+1 TCT WITH GRAINS
+REDELIVERY CHITTAGONG
+3.75 ADDCOM PUS
+
+--------------------------------------------
+SEASIA
+ACC DAI AN OCEAN SHIPPING COMPANY LIMITED
+SMX-UMX MAX 20 YRS.
+DELY TO MAKE SANGATTA (NEAR TO TJ BARA), E KALI OF INDONESIA.
+29-2ND JUN
+1 TCT WITH CLINKER TO BDESH.
+DURATION ABT 30 DAYS WOG.
+3.75PCT ADDOM PUS
+TRY PERIOD
+
+--------------------------------------------
+WORLDWIDE
+ACC DAI AN OCEAN SHIPPING COMPANY LIMITED
+SUPRA/ULTRA DELY WW
+FULL MAY
+1-3 YEARS TRY SHORT PERIOD
+FLAT OR INDEX BOTH WORKABLE
+3.75 ADDCOM PUS"""
+    },
+    {
+        "category_hint": "cargo_tc",
+        "sender": "switson87@seaschiffe.com",
+        "subject": "TC CARGO - SEA SCHIFFE - ECI/MED + ECI/ARAG",
+        "text": """Please provide suitable, rated vessels for our following firm requirements.
+
+* A/C SeaSchiffe
+* 1 TCT with Steels/Gens/lawfuls
+* 22k dwt upto HMAX
+* Delivery: ECI
+* Laycan: 15-18 July
+* Redel: Med via GOA transit
+* Duration: abt 35-40 days wog
+* 3.75% Adc
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+* A/C SeaSchiffe
+* 1 TCT with Steels/Gens/lawfuls
+* 33k dwt upto HMAX
+* Delivery: ECI
+* Laycan: 21-23 July
+* Redel: ARAG via COGH transit
+* Duration: abt 50-55 days wog
+* 3.75% Adc
+
+We look forward to hearing from you.
+
+Best regards,
+Steve
+Sea Schiffe DMCC
+Skype: switson87
+M: +91-8459221078"""
+    },
+]

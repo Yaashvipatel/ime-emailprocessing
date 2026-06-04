@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Cargo TC — IME{% endblock %}
+{% block tb_title %}Cargo TC Database{% endblock %}
+{% block tb_sub %}Time charter cargo records{% endblock %}
+{% block content %}
+<div class="ph">
+  <div class="ph-row">
+    <div><h1>Cargo TC Database</h1><p>{{ count }} time charter records</p></div>
+    <form style="display:flex;gap:8px;" method="get">
+      <input class="fc" name="q" value="{{ search }}" placeholder="Search cargo, ports…" style="width:240px;height:36px;">
+      <button class="btn btn-s btn-sm" type="submit">Search</button>
+      {% if search %}<a href="/cargo-tc" class="btn btn-s btn-sm">Clear</a>{% endif %}
+    </form>
+  </div>
+</div>
+<div class="card">
+  <div class="tbl-wrap">
+    {% if rows %}
+    <table class="tbl">
+      <thead><tr><th>#</th><th>Cargo</th><th>Type</th><th>Delivery Port</th><th>Redelivery Port</th><th>Duration</th><th>Laycan</th><th>Size Pref.</th><th>Commission</th><th>Conf.</th></tr></thead>
+      <tbody>
+      {% for r in rows %}
+      <tr>
+        <td class="cm" style="color:var(--t3)">{{ r.id }}</td>
+        <td><span class="cp">📋 {{ r.cargo_name or '—' }}</span></td>
+        <td><span class="bdg btc">{{ r.cargo_type or 'Dry Bulk' }}</span></td>
+        <td>{{ r.delivery_port or '—' }}</td>
+        <td>{{ r.redelivery_port or '—' }}</td>
+        <td class="cm">{{ r.duration or '—' }}</td>
+        <td class="cm">{{ r.laycan or '—' }}</td>
+        <td class="cm">{{ r.vessel_size_pref or '—' }}</td>
+        <td><span class="bdg bi">{{ r.commission_pct or '—' }}</span></td>
+        <td><div class="cbar"><div class="ctrack"><div class="cfill" style="width:{{ r.confidence or 0 }}%;background:{% if (r.confidence or 0)>=80 %}#10B981{% elif (r.confidence or 0)>=60 %}#F59E0B{% else %}#EF4444{% endif %}"></div></div><span class="clbl">{{ r.confidence or 0 }}%</span></div></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty"><h3>No TC cargo records found</h3><p>{% if search %}No results for "{{ search }}"{% else %}Load sample data to populate{% endif %}</p></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

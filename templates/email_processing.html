@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+{% block title %}Email Processing — IME{% endblock %}
+{% block tb_title %}Email Processing{% endblock %}
+{% block tb_sub %}AI-powered classification & extraction{% endblock %}
+{% block content %}
+<style>
+.proc-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.drop-zone{border:2px dashed var(--border);border-radius:10px;padding:32px;text-align:center;color:var(--t3);transition:all .2s;cursor:pointer;}
+.drop-zone:hover,.drop-zone.drag{border-color:var(--accent);background:var(--accent-d);}
+.proc-pipeline{display:flex;flex-direction:column;gap:8px;padding:16px 0;}
+.pipe-step{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:8px;background:var(--elevated);border:1px solid var(--border);transition:all .3s;}
+.pipe-step.active{border-color:var(--accent);background:rgba(20,184,166,.08);}
+.pipe-step.done{border-color:rgba(16,185,129,.3);background:rgba(16,185,129,.06);}
+.pipe-num{width:24px;height:24px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;transition:all .3s;}
+.pipe-step.active .pipe-num{background:var(--accent);color:#0F172A;}
+.pipe-step.done .pipe-num{background:var(--success);color:#fff;}
+.pipe-text{font-size:13px;font-weight:500;}
+.pipe-sub{font-size:11px;color:var(--t3);}
+.res-field{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.res-field:last-child{border-bottom:none;}
+.res-icon{width:32px;height:32px;border-radius:6px;background:var(--elevated);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.res-label{font-size:11px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.5px;}
+.res-val{font-size:13px;color:var(--t1);font-weight:500;margin-top:2px;}
+.conf-ring{display:flex;align-items:center;justify-content:center;position:relative;width:80px;height:80px;}
+.conf-ring svg{transform:rotate(-90deg);}
+.conf-ring-val{position:absolute;font-size:18px;font-weight:700;color:var(--t1);}
+.sample-btns{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+.sample-btn{padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer;border:1px solid var(--border);background:var(--elevated);color:var(--t2);transition:all .15s;}
+.sample-btn:hover{border-color:var(--accent);color:var(--accent);}
+.ml-compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;}
+.ml-box{background:var(--elevated);border:1px solid var(--border);border-radius:8px;padding:14px;}
+.ml-box-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--t3);margin-bottom:10px;}
+.prob-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.prob-label{font-size:12px;color:var(--t2);width:90px;flex-shrink:0;}
+.prob-bar-wrap{flex:1;height:4px;background:var(--bg);border-radius:2px;}
+.prob-bar-fill{height:100%;border-radius:2px;transition:width .6s ease;}
+.prob-pct{font-size:11px;font-family:var(--mono);color:var(--t3);width:36px;text-align:right;}
+</style>
+
+<div class="ph">
+  <h1>Email Processing Center</h1>
+  <p>Paste a maritime email to classify and extract structured intelligence</p>
+</div>
+
+<div class="proc-grid">
+  <!-- INPUT PANEL -->
+  <div>
+    <div class="card mb16">
+      <div class="card-hd"><span class="card-ttl">Email Input</span></div>
+      <div class="fg">
+        <label class="fl">Sender</label>
+        <input class="fc" id="inp-sender" placeholder="chartering@primemaritime.gr">
+      </div>
+      <div class="fg">
+        <label class="fl">Subject</label>
+        <input class="fc" id="inp-subject" placeholder="OPEN VESSELS - PACIFIC">
+      </div>
+      <div class="fg">
+        <label class="fl">Email Body</label>
+        <textarea class="fc" id="inp-body" rows="12" placeholder="Paste full maritime email text here…&#10;&#10;Supports: Tonnage lists, Cargo VC/TC offers, Vessel particulars"></textarea>
+      </div>
+      <div class="sample-btns">
+        <span style="font-size:11px;color:var(--t3);margin-right:4px;">Samples:</span>
+        <button class="sample-btn" onclick="loadSample('tonnage')">⚓ Tonnage</button>
+        <button class="sample-btn" onclick="loadSample('cargo_vc')">📦 Cargo VC</button>
+        <button class="sample-btn" onclick="loadSample('cargo_tc')">📋 Cargo TC</button>
+      </div>
+      <div class="frow">
+        <button class="btn btn-p" onclick="processEmail()" id="proc-btn">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          Analyse Email
+        </button>
+        <button class="btn btn-s" onclick="clearForm()">Clear</button>
+      </div>
+    </div>
+
+    <!-- PIPELINE -->
+    <div class="card">
+      <div class="card-hd"><span class="card-ttl">Processing Pipeline</span></div>
+      <div class="proc-pipeline" id="pipeline">
+        <div class="pipe-step" id="pipe-1"><div class="pipe-num">1</div><div><div class="pipe-text">Email Ingestion</div><div class="pipe-sub">Text normalization</div></div></div>
+        <div class="pipe-step" id="pipe-2"><div class="pipe-num">2</div><div><div class="pipe-text">Keyword Scoring</div><div class="pipe-sub">Pattern matching engine</div></div></div>
+        <div class="pipe-step" id="pipe-3"><div class="pipe-num">3</div><div><div class="pipe-text">ML Classification</div><div class="pipe-sub">TF-IDF + Logistic Regression</div></div></div>
+        <div class="pipe-step" id="pipe-4"><div class="pipe-num">4</div><div><div class="pipe-text">Data Extraction</div><div class="pipe-sub">Regex field extraction</div></div></div>
+        <div class="pipe-step" id="pipe-5"><div class="pipe-num">5</div><div><div class="pipe-text">Database Storage</div><div class="pipe-sub">Structured record saved</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS PANEL -->
+  <div>
+    <div class="card mb16" id="result-panel" style="display:none;">
+      <div class="card-hd">
+        <span class="card-ttl">Classification Result</span>
+        <span class="bdg" id="res-badge"></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:20px;margin-bottom:20px;">
+        <div class="conf-ring">
+          <svg width="80" height="80" viewBox="0 0 80 80">
+            <circle class="conf-ring-bg" cx="40" cy="40" r="32" fill="none" stroke="var(--elevated)" stroke-width="6"/>
+            <circle id="conf-arc" cx="40" cy="40" r="32" fill="none" stroke="var(--accent)" stroke-width="6" stroke-linecap="round" stroke-dasharray="201" stroke-dashoffset="201"/>
+          </svg>
+          <div class="conf-ring-val" id="conf-val">0%</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--t3);margin-bottom:4px;">Classified As</div>
+          <div style="font-size:18px;font-weight:700;color:var(--t1)" id="res-cat"></div>
+          <div style="font-size:12px;color:var(--t2);margin-top:4px" id="res-sub"></div>
+        </div>
+      </div>
+      <!-- ML Comparison -->
+      <div class="ml-compare" id="ml-compare" style="display:none;">
+        <div class="ml-box">
+          <div class="ml-box-title">Rule Engine</div>
+          <div id="rule-probs"></div>
+        </div>
+        <div class="ml-box">
+          <div class="ml-box-title">ML Model</div>
+          <div id="ml-probs"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="fields-panel" style="display:none;">
+      <div class="card-hd"><span class="card-ttl">Extracted Intelligence</span><span class="bdg bi" id="field-count"></span></div>
+      <div id="fields-list"></div>
+    </div>
+
+    <div class="card mt16" id="placeholder-card">
+      <div class="empty">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+        <h3>Awaiting Email Input</h3>
+        <p>Paste a maritime email and click Analyse to see<br>classification results and extracted fields.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SAMPLES = {
+  tonnage:`MV SHENG AN HAI DWT 56564 OPEN XIAMEN, CHINA O/A 2ND JUNE 2026\nM/V: SHENG AN HAI\nBUILT: 2012\nFLAG: CHINA\nCLASS: CCS\nLOA 189.99M/ BEAM 32.26M\nDWT 56564 MT ON 12.8M SSW\nHO/HA: 5/5\nGRAIN 71634 CBM\nSPD/CONS:\nBALLAST: ABT 12.5 KNOTS ON 23 MT LSFO`,
+  cargo_vc:`PLEASE OFFER FIRM FOR FOLL CARGO\n50,000 MTS COAL IN BULK\nLOAD PORT: NEWCASTLE, AUSTRALIA\nDISCHARGE PORT: MUNDRA, INDIA\nLAYCAN: 10-20 JUNE 2026\nLOAD RATE: 5000 PWWD SSHEX\nDISCH RATE: 3000 PWWD SSHEX\nCOMM: 3.75 PCT TTL`,
+  cargo_tc:`ACC DAI AN OCEAN SHIPPING\nSMX-UMX MAX 20 YRS\nDELIVERY SINGAPORE\nLC 10-17 JUNE 2026\n1 TCT WITH GRAINS\nREDELIVERY CHITTAGONG\nDURATION ABT 30 DAYS WOG\n3.75 ADDCOM PUS`
+};
+function loadSample(t){
+  const s={tonnage:'chartering@primemaritime.gr',cargo_vc:'chartering@broker.com',cargo_tc:'kp@broker.gr'};
+  const sub={tonnage:'OPEN VESSELS - PACIFIC',cargo_vc:'VC CARGO - NEWCASTLE/MUNDRA',cargo_tc:'TC CARGO - SINGAPORE/CHITTAGONG'};
+  document.getElementById('inp-sender').value=s[t];
+  document.getElementById('inp-subject').value=sub[t];
+  document.getElementById('inp-body').value=SAMPLES[t];
+}
+function clearForm(){
+  ['inp-sender','inp-subject','inp-body'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('result-panel').style.display='none';
+  document.getElementById('fields-panel').style.display='none';
+  document.getElementById('placeholder-card').style.display='block';
+  ['pipe-1','pipe-2','pipe-3','pipe-4','pipe-5'].forEach(id=>{document.getElementById(id).classList.remove('active','done');});
+}
+async function animatePipeline(){
+  for(let i=1;i<=5;i++){
+    document.getElementById(`pipe-${i}`).classList.add('active');
+    await new Promise(r=>setTimeout(r,350));
+    document.getElementById(`pipe-${i}`).classList.remove('active');
+    document.getElementById(`pipe-${i}`).classList.add('done');
+  }
+}
+async function processEmail(){
+  const text=document.getElementById('inp-body').value.trim();
+  if(!text){toast('Please paste an email first','error');return;}
+  const btn=document.getElementById('proc-btn');
+  btn.textContent='Processing…';btn.disabled=true;
+  document.getElementById('placeholder-card').style.display='none';
+  document.getElementById('result-panel').style.display='none';
+  document.getElementById('fields-panel').style.display='none';
+  ['pipe-1','pipe-2','pipe-3','pipe-4','pipe-5'].forEach(id=>{document.getElementById(id).classList.remove('done','active');});
+  const pipeAnim=animatePipeline();
+  try{
+    const [ruleRes,mlRes]=await Promise.all([
+      fetch('/parse',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,sender:document.getElementById('inp-sender').value,subject:document.getElementById('inp-subject').value})}),
+      fetch('/api/ml-predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})})
+    ]);
+    await pipeAnim;
+    const d=await ruleRes.json();
+    const ml=await mlRes.json();
+    showResult(d,ml);
+    toast('Email classified successfully','success');
+  }catch(e){toast('Processing failed: '+e.message,'error');}
+  btn.textContent='Analyse Email';btn.disabled=false;
+}
+function showResult(d,ml){
+  const catColors={tonnage:'#3B82F6',cargo_vc:'#10B981',cargo_tc:'#F59E0B'};
+  const catLabels={tonnage:'Tonnage (Open Vessels)',cargo_vc:'Cargo VC (Voyage Charter)',cargo_tc:'Cargo TC (Time Charter)'};
+  const c=catColors[d.category]||'var(--accent)';
+  const badge=document.getElementById('res-badge');
+  badge.textContent=d.category_label||d.category;
+  badge.className=`bdg ${d.category==='tonnage'?'bt':d.category==='cargo_vc'?'bvc':'btc'}`;
+  document.getElementById('res-cat').textContent=d.category_label||d.category;
+  document.getElementById('res-sub').textContent=`${d.record_count} record(s) extracted`;
+  // Confidence ring
+  const conf=d.confidence||0;
+  const arc=document.getElementById('conf-arc');
+  const circ=2*Math.PI*32;
+  arc.style.strokeDasharray=circ;
+  arc.style.strokeDashoffset=circ-(conf/100)*circ;
+  arc.style.stroke=conf>=80?'var(--success)':conf>=60?'var(--warn)':'var(--danger)';
+  document.getElementById('conf-val').textContent=conf+'%';
+  // ML comparison
+  if(ml&&ml.ml_prediction){
+    const mc=document.getElementById('ml-compare');
+    mc.style.display='grid';
+    const scores=d.scores||{};
+    const total=Object.values(scores).reduce((a,b)=>a+b,1);
+    const ruleDiv=document.getElementById('rule-probs');
+    const catLabels={tonnage:'Tonnage',cargo_vc:'Cargo VC',cargo_tc:'Cargo TC'};
+    ruleDiv.innerHTML=['tonnage','cargo_vc','cargo_tc'].map(cat=>{
+      const pct=Math.round(((scores[cat]||0)/total)*100);
+      const color=catColors[cat];
+      return `<div class="prob-row"><span class="prob-label">${catLabels[cat]}</span><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:${pct}%;background:${color}"></div></div><span class="prob-pct">${pct}%</span></div>`;
+    }).join('');
+    const mlDiv=document.getElementById('ml-probs');
+    const probs=ml.ml_probabilities||{};
+    mlDiv.innerHTML=['tonnage','cargo_vc','cargo_tc'].map(cat=>{
+      const pct=Math.round(probs[cat]||0);
+      const color=catColors[cat];
+      return `<div class="prob-row"><span class="prob-label">${catLabels[cat]}</span><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:${pct}%;background:${color}"></div></div><span class="prob-pct">${pct}%</span></div>`;
+    }).join('');
+  }
+  document.getElementById('result-panel').style.display='block';
+  // Fields
+  const records=d.records||[];
+  if(records.length){
+    const fl=document.getElementById('fields-list');
+    const fieldIcons={vessel_name:'⚓',vessel_size_dwt:'⚖',open_port:'📍',open_date:'📅',flag:'🏳',classification:'🏅',vessel_type:'🚢',loading_port:'📍',discharge_port:'🏁',laycan:'📅',cargo_name:'📦',quantity:'⚖',cargo_type:'🗂',delivery_port:'📍',redelivery_port:'🏁',duration:'⏱',commission_pct:'💰',account_name:'🏢'};
+    let html='';
+    const rec=records[0];
+    let count=0;
+    Object.entries(rec).forEach(([k,v])=>{
+      if(!v||k==='raw_note')return;
+      count++;
+      const icon=fieldIcons[k]||'•';
+      const label=k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+      html+=`<div class="res-field"><div class="res-icon">${icon}</div><div><div class="res-label">${label}</div><div class="res-val">${v}</div></div></div>`;
+    });
+    fl.innerHTML=html||'<p style="color:var(--t3);font-size:13px">No structured fields extracted</p>';
+    document.getElementById('field-count').textContent=`${count} fields`;
+    document.getElementById('fields-panel').style.display='block';
+  }
+}
+</script>
+{% endblock %}

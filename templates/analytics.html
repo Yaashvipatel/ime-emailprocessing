@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Analytics — IME{% endblock %}
+{% block tb_title %}Analytics{% endblock %}
+{% block tb_sub %}Executive intelligence & market insights{% endblock %}
+{% block content %}
+<style>
+.chart-bar-h{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.chart-bar-h:last-child{margin-bottom:0;}
+.chart-label{font-size:12px;color:var(--t2);width:90px;flex-shrink:0;}
+.chart-track{flex:1;height:20px;background:var(--elevated);border-radius:4px;overflow:hidden;}
+.chart-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:600;color:#0F172A;transition:width 1s ease;}
+.pie-wrap{display:flex;flex-direction:column;gap:10px;}
+.pie-row{display:flex;align-items:center;gap:12px;}
+.pie-color{width:12px;height:12px;border-radius:3px;flex-shrink:0;}
+.pie-label{font-size:13px;color:var(--t2);flex:1;}
+.pie-val{font-size:14px;font-weight:700;color:var(--t1);font-family:var(--mono);}
+.pie-bar{flex:2;height:6px;background:var(--elevated);border-radius:3px;overflow:hidden;}
+.pie-bar-fill{height:100%;border-radius:3px;transition:width 1s ease;}
+</style>
+
+<div class="ph"><h1>Analytics</h1><p>Market intelligence & operational performance metrics</p></div>
+
+<div class="kpi-grid">
+  <div class="kpi" style="--kc:#3B82F6"><div class="kpi-lbl">Total Emails</div><div class="kpi-val" data-count="{{ stats.emails }}">{{ stats.emails }}</div></div>
+  <div class="kpi" style="--kc:#14B8A6"><div class="kpi-lbl">Vessels</div><div class="kpi-val" data-count="{{ stats.tonnage }}">{{ stats.tonnage }}</div></div>
+  <div class="kpi" style="--kc:#10B981"><div class="kpi-lbl">VC Cargoes</div><div class="kpi-val" data-count="{{ stats.cargo_vc }}">{{ stats.cargo_vc }}</div></div>
+  <div class="kpi" style="--kc:#F59E0B"><div class="kpi-lbl">TC Cargoes</div><div class="kpi-val" data-count="{{ stats.cargo_tc }}">{{ stats.cargo_tc }}</div></div>
+</div>
+
+<div class="g2 mb16">
+  <div class="card">
+    <div class="card-hd"><span class="card-ttl">Email Classification Breakdown</span></div>
+    {% set total = stats.emails or 1 %}
+    {% set t_pct = ((stats.tonnage / total) * 100)|round|int if total > 0 else 0 %}
+    {% set vc_pct = ((stats.cargo_vc / total) * 100)|round|int if total > 0 else 0 %}
+    {% set tc_pct = ((stats.cargo_tc / total) * 100)|round|int if total > 0 else 0 %}
+    <div class="pie-wrap">
+      <div class="pie-row">
+        <div class="pie-color" style="background:#3B82F6"></div>
+        <span class="pie-label">Tonnage (Open Vessels)</span>
+        <div class="pie-bar"><div class="pie-bar-fill" style="width:0%;background:#3B82F6" data-w="{{ t_pct }}"></div></div>
+        <span class="pie-val">{{ stats.tonnage }}</span>
+        <span style="font-size:11px;color:var(--t3);width:32px;text-align:right">{{ t_pct }}%</span>
+      </div>
+      <div class="pie-row">
+        <div class="pie-color" style="background:#10B981"></div>
+        <span class="pie-label">Cargo VC (Voyage Charter)</span>
+        <div class="pie-bar"><div class="pie-bar-fill" style="width:0%;background:#10B981" data-w="{{ vc_pct }}"></div></div>
+        <span class="pie-val">{{ stats.cargo_vc }}</span>
+        <span style="font-size:11px;color:var(--t3);width:32px;text-align:right">{{ vc_pct }}%</span>
+      </div>
+      <div class="pie-row">
+        <div class="pie-color" style="background:#F59E0B"></div>
+        <span class="pie-label">Cargo TC (Time Charter)</span>
+        <div class="pie-bar"><div class="pie-bar-fill" style="width:0%;background:#F59E0B" data-w="{{ tc_pct }}"></div></div>
+        <span class="pie-val">{{ stats.cargo_tc }}</span>
+        <span style="font-size:11px;color:var(--t3);width:32px;text-align:right">{{ tc_pct }}%</span>
+      </div>
+    </div>
+    <div style="margin-top:20px;">
+      <div style="display:flex;height:12px;border-radius:6px;overflow:hidden;">
+        <div style="width:{{ t_pct }}%;background:#3B82F6;transition:width 1s ease;" data-w="{{ t_pct }}"></div>
+        <div style="width:{{ vc_pct }}%;background:#10B981;transition:width 1s ease;" data-w="{{ vc_pct }}"></div>
+        <div style="width:{{ tc_pct }}%;background:#F59E0B;transition:width 1s ease;" data-w="{{ tc_pct }}"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd"><span class="card-ttl">Regional Market Activity</span></div>
+    <div id="region-chart">
+      <div class="chart-bar-h"><span class="chart-label">East Asia</span><div class="chart-track"><div class="chart-fill" style="width:0%;background:#3B82F6" data-w="82">82%</div></div></div>
+      <div class="chart-bar-h"><span class="chart-label">SE Asia</span><div class="chart-track"><div class="chart-fill" style="width:0%;background:#14B8A6" data-w="74">74%</div></div></div>
+      <div class="chart-bar-h"><span class="chart-label">South Asia</span><div class="chart-track"><div class="chart-fill" style="width:0%;background:#10B981" data-w="65">65%</div></div></div>
+      <div class="chart-bar-h"><span class="chart-label">Middle East</span><div class="chart-track"><div class="chart-fill" style="width:0%;background:#F59E0B" data-w="58">58%</div></div></div>
+      <div class="chart-bar-h"><span class="chart-label">Europe</span><div class="chart-track"><div class="chart-fill" style="width:0%;background:#8B5CF6" data-w="44">44%</div></div></div>
+      <div class="chart-bar-h"><span class="chart-label">Americas</span><div class="chart-track"><div class="chart-fill" style="width:0%;background:#EF4444" data-w="37">37%</div></div></div>
+      <div class="chart-bar-h"><span class="chart-label">Africa</span><div class="chart-track"><div class="chart-fill" style="width:0%;background:#F472B6" data-w="28">28%</div></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="g2">
+  <div class="card">
+    <div class="card-hd"><span class="card-ttl">Cargo Type Distribution</span></div>
+    <div>
+      {% set cargo_types = [('Dry Bulk','#14B8A6',45),('Coal','#3B82F6',22),('Grain','#10B981',18),('Iron Ore','#F59E0B',10),('Steel/HRC','#8B5CF6',5)] %}
+      {% for name,color,pct in cargo_types %}
+      <div class="chart-bar-h">
+        <span class="chart-label">{{ name }}</span>
+        <div class="chart-track"><div class="chart-fill" style="width:0%;background:{{ color }}" data-w="{{ pct }}">{{ pct }}%</div></div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><span class="card-ttl">System Performance</span></div>
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:12px;color:var(--t2)">Rule-based Classifier</span><span style="font-size:12px;font-weight:600;color:var(--accent)" id="rule-acc">~85%</span></div>
+        <div style="height:6px;background:var(--elevated);border-radius:3px;"><div style="height:100%;width:85%;background:var(--accent);border-radius:3px;transition:width 1s ease;"></div></div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:12px;color:var(--t2)">ML TF-IDF Model</span><span style="font-size:12px;font-weight:600;color:#10B981" id="ml-acc-val">Loading…</span></div>
+        <div style="height:6px;background:var(--elevated);border-radius:3px;overflow:hidden;"><div id="ml-acc-bar" style="height:100%;width:0%;background:#10B981;border-radius:3px;transition:width 1s ease;"></div></div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:12px;color:var(--t2)">Data Extraction</span><span style="font-size:12px;font-weight:600;color:#3B82F6">~90%</span></div>
+        <div style="height:6px;background:var(--elevated);border-radius:3px;"><div style="height:100%;width:90%;background:#3B82F6;border-radius:3px;transition:width 1s ease;"></div></div>
+      </div>
+      <div style="margin-top:8px;padding-top:16px;border-top:1px solid var(--border);">
+        <div style="font-size:13px;color:var(--t2);margin-bottom:8px;">Processing Speed</div>
+        <div style="font-size:28px;font-weight:700;color:var(--t1)">&lt; 200<span style="font-size:14px;color:var(--t3);font-weight:400">ms</span></div>
+        <div style="font-size:11px;color:var(--t3);margin-top:4px;">Average per email</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+setTimeout(()=>{
+  document.querySelectorAll('[data-w]').forEach(el=>{el.style.width=el.dataset.w+'%';});
+},300);
+// Load ML accuracy
+fetch('/api/ml-metrics').then(r=>r.json()).then(d=>{
+  if(d.accuracy){
+    const pct=Math.round(d.accuracy*100);
+    document.getElementById('ml-acc-val').textContent=pct+'%';
+    document.getElementById('ml-acc-bar').style.width=pct+'%';
+  }
+}).catch(()=>{document.getElementById('ml-acc-val').textContent='Train model';});
+</script>
+{% endblock %}

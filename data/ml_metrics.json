@@ -1,0 +1,245 @@
+{
+  "accuracy": 1.0,
+  "cv_scores": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+  ],
+  "cv_std": 0.0,
+  "training_samples": 24,
+  "confusion_matrix": [
+    [
+      8,
+      0,
+      0
+    ],
+    [
+      0,
+      8,
+      0
+    ],
+    [
+      0,
+      0,
+      8
+    ]
+  ],
+  "classes": [
+    "tonnage",
+    "cargo_vc",
+    "cargo_tc"
+  ],
+  "per_class": {
+    "tonnage": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 8
+    },
+    "cargo_vc": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 8
+    },
+    "cargo_tc": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 8
+    }
+  },
+  "top_features": {
+    "tonnage": [
+      {
+        "word": "open",
+        "weight": 1.479
+      },
+      {
+        "word": "mv",
+        "weight": 1.303
+      },
+      {
+        "word": "built",
+        "weight": 1.179
+      },
+      {
+        "word": "vessel",
+        "weight": 1.168
+      },
+      {
+        "word": "flag",
+        "weight": 1.153
+      },
+      {
+        "word": "loa",
+        "weight": 1.145
+      },
+      {
+        "word": "dwt",
+        "weight": 1.023
+      },
+      {
+        "word": "may",
+        "weight": 0.967
+      },
+      {
+        "word": "star",
+        "weight": 0.953
+      },
+      {
+        "word": "dwt open",
+        "weight": 0.921
+      },
+      {
+        "word": "class",
+        "weight": 0.763
+      },
+      {
+        "word": "coral",
+        "weight": 0.695
+      },
+      {
+        "word": "dwt 37500",
+        "weight": 0.695
+      },
+      {
+        "word": "sea dwt",
+        "weight": 0.695
+      },
+      {
+        "word": "12 june",
+        "weight": 0.695
+      }
+    ],
+    "cargo_vc": [
+      {
+        "word": "mts",
+        "weight": 1.34
+      },
+      {
+        "word": "port",
+        "weight": 1.12
+      },
+      {
+        "word": "fios",
+        "weight": 1.083
+      },
+      {
+        "word": "ttl",
+        "weight": 1.049
+      },
+      {
+        "word": "discharge",
+        "weight": 1.049
+      },
+      {
+        "word": "july fios",
+        "weight": 0.95
+      },
+      {
+        "word": "cqd 75",
+        "weight": 0.943
+      },
+      {
+        "word": "cqd",
+        "weight": 0.943
+      },
+      {
+        "word": "25 june",
+        "weight": 0.933
+      },
+      {
+        "word": "15000",
+        "weight": 0.929
+      },
+      {
+        "word": "cargo",
+        "weight": 0.927
+      },
+      {
+        "word": "commission",
+        "weight": 0.917
+      },
+      {
+        "word": "pod",
+        "weight": 0.902
+      },
+      {
+        "word": "iron ore",
+        "weight": 0.902
+      },
+      {
+        "word": "pol",
+        "weight": 0.902
+      }
+    ],
+    "cargo_tc": [
+      {
+        "word": "addcom",
+        "weight": 1.173
+      },
+      {
+        "word": "duration",
+        "weight": 1.17
+      },
+      {
+        "word": "days",
+        "weight": 1.156
+      },
+      {
+        "word": "delivery",
+        "weight": 1.148
+      },
+      {
+        "word": "redelivery",
+        "weight": 1.134
+      },
+      {
+        "word": "with",
+        "weight": 1.133
+      },
+      {
+        "word": "wog",
+        "weight": 1.115
+      },
+      {
+        "word": "days wog",
+        "weight": 1.115
+      },
+      {
+        "word": "tct",
+        "weight": 1.064
+      },
+      {
+        "word": "dely",
+        "weight": 1.046
+      },
+      {
+        "word": "75 addcom",
+        "weight": 1.04
+      },
+      {
+        "word": "redel",
+        "weight": 1.011
+      },
+      {
+        "word": "adc",
+        "weight": 0.966
+      },
+      {
+        "word": "75pct",
+        "weight": 0.927
+      },
+      {
+        "word": "supra",
+        "weight": 0.877
+      }
+    ]
+  },
+  "trained_at": "2026-06-04T08:50:17.802603",
+  "model_ready": true,
+  "engine": "Pure-Python TF-IDF + Logistic Regression"
+}

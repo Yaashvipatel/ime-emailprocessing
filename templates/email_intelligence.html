@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Email Intelligence — IME{% endblock %}
+{% block tb_title %}Email Intelligence{% endblock %}
+{% block tb_sub %}All processed emails & classification history{% endblock %}
+{% block content %}
+<div class="ph">
+  <div class="ph-row">
+    <div><h1>Email Intelligence</h1><p>{{ recent|length }} recent email records</p></div>
+    <a href="/email-processing" class="btn btn-p">+ Process New Email</a>
+  </div>
+</div>
+<div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
+  <div class="kpi" style="--kc:#3B82F6"><div class="kpi-lbl">Total Processed</div><div class="kpi-val" data-count="{{ stats.emails }}">{{ stats.emails }}</div></div>
+  <div class="kpi" style="--kc:#14B8A6"><div class="kpi-lbl">Avg Confidence</div><div class="kpi-val" id="avg-conf">—</div></div>
+  <div class="kpi" style="--kc:#10B981"><div class="kpi-lbl">Categories</div><div class="kpi-val">3</div><div class="kpi-sub">Tonnage · VC · TC</div></div>
+</div>
+<div class="card">
+  <div class="tbl-wrap">
+    {% if recent %}
+    <table class="tbl">
+      <thead><tr><th>#</th><th>Category</th><th>Sender</th><th>Subject</th><th>Preview</th><th>Records</th><th>Confidence</th><th>Processed</th></tr></thead>
+      <tbody>
+      {% for e in recent %}
+      <tr>
+        <td class="cm" style="color:var(--t3)">{{ e.id }}</td>
+        <td><span class="bdg {% if e.category=='tonnage' %}bt{% elif e.category=='cargo_vc' %}bvc{% else %}btc{% endif %}">{{ e.category_label or e.category }}</span></td>
+        <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--t2)">{{ e.sender or '—' }}</td>
+        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" class="cp">{{ e.subject or '—' }}</td>
+        <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--t3)">{{ e.snippet[:80] if e.snippet else '—' }}</td>
+        <td class="cm">{{ e.record_count or 0 }}</td>
+        <td><div class="cbar"><div class="ctrack"><div class="cfill" style="width:{{ e.confidence or 0 }}%;background:{% if (e.confidence or 0)>=80 %}#10B981{% elif (e.confidence or 0)>=60 %}#F59E0B{% else %}#EF4444{% endif %}"></div></div><span class="clbl">{{ e.confidence or 0 }}%</span></div></td>
+        <td class="cm" style="font-size:11px;color:var(--t3)">{{ e.created_at[:16] if e.created_at else '—' }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty"><h3>No emails processed yet</h3><p>Click <b>Load Sample Data</b> in the top bar to get started.</p></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const rows=document.querySelectorAll('.tbl tbody tr');
+let total=0,count=0;
+rows.forEach(r=>{
+  const c=r.querySelector('.cbar .clbl');
+  if(c){total+=parseInt(c.textContent)||0;count++;}
+});
+if(count>0)document.getElementById('avg-conf').textContent=Math.round(total/count)+'%';
+</script>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}Match Engine — IME{% endblock %}
+{% block tb_title %}Match Engine{% endblock %}
+{% block tb_sub %}Vessel ↔ Cargo Matching Intelligence{% endblock %}
+{% block content %}
+<style>
+.match-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;transition:all .2s;border-left:3px solid transparent;}
+.match-card:hover{border-color:var(--border-b);border-left-color:var(--accent);transform:translateX(2px);}
+.match-card.high{border-left-color:#10B981;}
+.match-card.mid{border-left-color:#F59E0B;}
+.match-card.low{border-left-color:#64748B;}
+.match-header{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.match-vessels{display:flex;align-items:center;gap:12px;flex:1;}
+.match-box{background:var(--elevated);border-radius:6px;padding:10px 14px;flex:1;}
+.match-box-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--t3);margin-bottom:4px;}
+.match-box-name{font-size:14px;font-weight:600;color:var(--t1);}
+.match-box-sub{font-size:11px;color:var(--t2);margin-top:2px;}
+.match-arrow{font-size:20px;color:var(--accent);flex-shrink:0;}
+.score-circle{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;}
+.match-reasons{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+.reason-tag{padding:3px 8px;border-radius:4px;font-size:11px;background:rgba(20,184,166,.1);color:var(--accent);border:1px solid rgba(20,184,166,.2);}
+.filter-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:center;}
+.filter-chip{padding:5px 12px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--elevated);color:var(--t2);transition:all .15s;}
+.filter-chip.active{background:var(--accent-d);color:var(--accent);border-color:rgba(20,184,166,.3);}
+</style>
+
+<div class="ph">
+  <div class="ph-row">
+    <div>
+      <h1>Vessel ↔ Cargo Match Engine</h1>
+      <p>AI-powered matching of open vessels to cargo opportunities by region, DWT &amp; laycan overlap</p>
+    </div>
+    <button class="btn btn-p" onclick="location.reload()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+      Refresh Matches
+    </button>
+  </div>
+</div>
+
+<!-- STATS -->
+{% set stats = matches.stats %}
+<div class="kpi-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));">
+  <div class="kpi" style="--kc:#14B8A6"><div class="kpi-lbl">Total Matches</div><div class="kpi-val" data-count="{{ stats.total_matches|default(0) }}">{{ stats.total_matches|default(0) }}</div></div>
+  <div class="kpi" style="--kc:#10B981"><div class="kpi-lbl">High Confidence</div><div class="kpi-val" data-count="{{ stats.high_confidence|default(0) }}">{{ stats.high_confidence|default(0) }}</div><div class="kpi-sub" style="color:var(--success)">Score ≥ 70</div></div>
+  <div class="kpi" style="--kc:#F59E0B"><div class="kpi-lbl">Medium Confidence</div><div class="kpi-val" data-count="{{ stats.medium_confidence|default(0) }}">{{ stats.medium_confidence|default(0) }}</div><div class="kpi-sub">Score 50–70</div></div>
+  <div class="kpi" style="--kc:#3B82F6"><div class="kpi-lbl">VC Matches</div><div class="kpi-val" data-count="{{ stats.vc_matches|default(0) }}">{{ stats.vc_matches|default(0) }}</div></div>
+  <div class="kpi" style="--kc:#8B5CF6"><div class="kpi-lbl">TC Matches</div><div class="kpi-val" data-count="{{ stats.tc_matches|default(0) }}">{{ stats.tc_matches|default(0) }}</div></div>
+  <div class="kpi" style="--kc:#EF4444"><div class="kpi-lbl">Open Vessels</div><div class="kpi-val" data-count="{{ stats.vessels_available|default(0) }}">{{ stats.vessels_available|default(0) }}</div></div>
+</div>
+
+{% set all_matches = matches.matches %}
+{% if all_matches %}
+<!-- FILTERS -->
+<div class="filter-bar">
+  <span style="font-size:12px;color:var(--t3);">Filter:</span>
+  <div class="filter-chip active" onclick="filterMatches('all',this)">All ({{ all_matches|length }})</div>
+  <div class="filter-chip" onclick="filterMatches('VC',this)">VC Only</div>
+  <div class="filter-chip" onclick="filterMatches('TC',this)">TC Only</div>
+  <div class="filter-chip" onclick="filterMatches('high',this)">High Confidence ≥70</div>
+  <input type="text" class="fc" style="max-width:200px;height:32px;" placeholder="Filter by vessel/cargo…" oninput="searchMatches(this.value)">
+</div>
+
+<div id="matches-list">
+{% for m in all_matches %}
+{% set tier = 'high' if m.score >= 70 else ('mid' if m.score >= 50 else 'low') %}
+{% set score_color = '#10B981' if m.score >= 70 else ('#F59E0B' if m.score >= 50 else '#64748B') %}
+<div class="match-card {{ tier }}" data-type="{{ m.type }}" data-score="{{ m.score }}" data-text="{{ m.vessel_name }} {{ m.cargo_name }} {{ m.vessel_port }} {{ m.load_port }}">
+  <div class="match-header">
+    <div class="match-vessels">
+      <div class="match-box" style="border-left:2px solid #3B82F6">
+        <div class="match-box-label">⚓ Vessel</div>
+        <div class="match-box-name">{{ m.vessel_name or 'Unknown' }}</div>
+        <div class="match-box-sub">{{ m.vessel_dwt }} DWT · {{ m.vessel_port or 'N/A' }} · {{ m.vessel_date or 'TBD' }}</div>
+      </div>
+      <div class="match-arrow">⇄</div>
+      <div class="match-box" style="border-left:2px solid {% if m.type=='VC' %}#10B981{% else %}#F59E0B{% endif %}">
+        <div class="match-box-label">{% if m.type=='VC' %}📦 Cargo VC{% else %}📋 Cargo TC{% endif %}</div>
+        <div class="match-box-name">{{ m.cargo_name or 'General Cargo' }}</div>
+        <div class="match-box-sub">{{ m.load_port or 'N/A' }} → {{ m.disch_port or 'N/A' }} · {{ m.laycan or 'Open' }}</div>
+      </div>
+    </div>
+    <div>
+      <div class="score-circle" style="background:{{ score_color }}22;color:{{ score_color }};border:2px solid {{ score_color }}44;">{{ m.score }}</div>
+      <div style="text-align:center;font-size:10px;color:var(--t3);margin-top:4px;">Score</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+    <span class="bdg {% if m.type=='VC' %}bvc{% else %}btc{% endif %}">{{ m.type_label }}</span>
+    <span style="font-size:11px;color:var(--t3);">{{ m.vessel_region }} ↔ {{ m.cargo_region }}</span>
+    {% if m.commission and m.commission != 'N/A' %}<span class="bdg bi">Comm: {{ m.commission }}</span>{% endif %}
+    <span class="bdg {% if m.score>=70 %}bs{% elif m.score>=50 %}bw{% else %}bn{% endif %}">
+      {% if m.score>=70 %}High Match{% elif m.score>=50 %}Medium Match{% else %}Possible Match{% endif %}
+    </span>
+    <div class="match-reasons">
+      {% for r in m.reasons %}<span class="reason-tag">✓ {{ r }}</span>{% endfor %}
+    </div>
+  </div>
+</div>
+{% endfor %}
+</div>
+
+{% else %}
+<div class="card">
+  <div class="empty">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+    <h3>No Match Opportunities Found</h3>
+    <p>Load sample data first to generate vessel-cargo matches.</p>
+    <button class="btn btn-p" style="margin-top:16px" onclick="seedData()">Load Sample Data</button>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script>
+function filterMatches(type,el){
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.match-card').forEach(card=>{
+    if(type==='all') card.style.display='';
+    else if(type==='high') card.style.display=parseInt(card.dataset.score)>=70?'':'none';
+    else card.style.display=card.dataset.type===type?'':'none';
+  });
+}
+function searchMatches(q){
+  const ql=q.toLowerCase();
+  document.querySelectorAll('.match-card').forEach(card=>{
+    card.style.display=card.dataset.text.toLowerCase().includes(ql)?'':'none';
+  });
+}
+</script>
+{% endblock %}

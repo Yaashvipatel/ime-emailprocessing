@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}IME — Maritime Intelligence{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0F172A;--surface:#1E293B;--elevated:#263348;--card:#1a2744;--border:rgba(99,119,160,0.18);--border-b:rgba(99,119,160,0.35);--accent:#14B8A6;--accent-d:rgba(20,184,166,0.15);--blue:#3B82F6;--blue-d:rgba(59,130,246,0.12);--success:#10B981;--warn:#F59E0B;--danger:#EF4444;--t1:#F1F5F9;--t2:#94A3B8;--t3:#64748B;--sw:240px;--th:56px;--font:'IBM Plex Sans',-apple-system,sans-serif;--mono:'IBM Plex Mono',monospace;--r:8px;--rl:12px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--bg);color:var(--t1);min-height:100vh;font-size:14px;line-height:1.5;}
+a{color:inherit;text-decoration:none;}
+/* SIDEBAR */
+#sb{position:fixed;left:0;top:0;bottom:0;width:var(--sw);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;transition:width .22s ease;}
+#sb.col{width:60px;}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:0 16px;height:var(--th);border-bottom:1px solid var(--border);flex-shrink:0;}
+.logo-m{width:32px;height:32px;flex-shrink:0;background:linear-gradient(135deg,#14B8A6,#3B82F6);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;}
+.logo-t{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;}
+.logo-s{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;white-space:nowrap;}
+.sb-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;color:var(--t3);padding:16px 16px 6px;white-space:nowrap;}
+#sb.col .sb-lbl{opacity:0;}
+.ni{display:flex;align-items:center;gap:10px;padding:8px 16px;margin:1px 8px;border-radius:6px;color:var(--t2);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.ni:hover{background:var(--elevated);color:var(--t1);}
+.ni.active{background:var(--accent-d);color:var(--accent);border:1px solid rgba(20,184,166,.2);}
+.ni-ic{width:18px;height:18px;flex-shrink:0;opacity:.8;}
+.ni.active .ni-ic{opacity:1;}
+.ni-lb{font-size:13px;font-weight:500;overflow:hidden;transition:opacity .2s;}
+.ni-bd{margin-left:auto;background:var(--accent);color:#0F172A;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;flex-shrink:0;}
+#sb.col .ni-lb,#sb.col .ni-bd{opacity:0;width:0;}
+.sb-foot{margin-top:auto;padding:12px 8px;border-top:1px solid var(--border);}
+.col-btn{display:flex;align-items:center;gap:10px;padding:8px 16px;border-radius:6px;color:var(--t3);cursor:pointer;transition:all .15s;background:none;border:none;width:100%;font-family:var(--font);}
+.col-btn:hover{color:var(--t1);background:var(--elevated);}
+/* TOPBAR */
+#tb{position:fixed;left:var(--sw);right:0;top:0;height:var(--th);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;padding:0 24px;z-index:99;transition:left .22s ease;}
+body.sbc #tb{left:60px;}
+body.sbc #mc{margin-left:60px;}
+.tb-ttl{font-size:15px;font-weight:600;}
+.tb-sub{font-size:11px;color:var(--t3);}
+.tb-search{flex:1;max-width:380px;margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--elevated);border:1px solid var(--border);border-radius:6px;padding:0 12px;height:32px;}
+.tb-search input{background:none;border:none;outline:none;color:var(--t1);font-family:var(--font);font-size:13px;flex:1;}
+.tb-search input::placeholder{color:var(--t3);}
+.tb-acts{display:flex;align-items:center;gap:8px;}
+.ic-btn{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;background:var(--elevated);border:1px solid var(--border);color:var(--t2);cursor:pointer;transition:all .15s;}
+.ic-btn:hover{border-color:var(--accent);color:var(--accent);}
+.st-pill{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);font-size:11px;font-weight:600;color:var(--success);}
+.st-dot{width:6px;height:6px;border-radius:50%;background:var(--success);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.avatar{width:32px;height:32px;border-radius:6px;background:linear-gradient(135deg,#14B8A6,#3B82F6);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;cursor:pointer;}
+/* MAIN */
+#mc{margin-left:var(--sw);margin-top:var(--th);padding:28px;min-height:calc(100vh - var(--th));transition:margin-left .22s ease;}
+/* PAGE HEADER */
+.ph{margin-bottom:24px;}
+.ph h1{font-size:22px;font-weight:700;line-height:1.2;}
+.ph p{font-size:13px;color:var(--t2);margin-top:4px;}
+.ph-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:20px;transition:border-color .2s;}
+.card:hover{border-color:var(--border-b);}
+.card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.card-ttl{font-size:12px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;}
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:16px;margin-bottom:24px;}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:18px 20px;position:relative;overflow:hidden;transition:transform .15s,border-color .15s,box-shadow .15s;}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--kc,var(--accent));}
+.kpi:hover{transform:translateY(-2px);border-color:var(--border-b);box-shadow:0 8px 32px rgba(0,0,0,.4);}
+.kpi-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--t3);margin-bottom:8px;}
+.kpi-val{font-size:28px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;}
+.kpi-sub{font-size:11px;color:var(--t3);margin-top:6px;display:flex;align-items:center;gap:4px;}
+.kpi-ico{position:absolute;right:16px;top:50%;transform:translateY(-50%);opacity:.05;}
+.kpi-ico svg{width:52px;height:52px;}
+/* TABLES */
+.tbl-wrap{overflow-x:auto;border-radius:var(--r);}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.tbl th{background:var(--elevated);color:var(--t3);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;padding:10px 14px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--border);position:sticky;top:0;}
+.tbl td{padding:11px 14px;border-bottom:1px solid var(--border);color:var(--t2);vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:rgba(99,119,160,.05);color:var(--t1);}
+.cp{color:var(--t1);font-weight:500;}
+.cm{font-family:var(--mono);font-size:12px;}
+/* BADGES */
+.bdg{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;white-space:nowrap;}
+.bt{background:rgba(59,130,246,.12);color:#60A5FA;border:1px solid rgba(59,130,246,.2);}
+.bvc{background:rgba(16,185,129,.12);color:#34D399;border:1px solid rgba(16,185,129,.2);}
+.btc{background:rgba(245,158,11,.12);color:#FCD34D;border:1px solid rgba(245,158,11,.2);}
+.bs{background:rgba(16,185,129,.12);color:#34D399;}
+.bw{background:rgba(245,158,11,.12);color:#FCD34D;}
+.bd{background:rgba(239,68,68,.12);color:#FCA5A5;}
+.bi{background:rgba(59,130,246,.12);color:#93C5FD;}
+.bn{background:rgba(99,119,160,.12);color:var(--t2);}
+/* BTNS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:6px;font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;}
+.btn-p{background:var(--accent);color:#0F172A;}
+.btn-p:hover{background:#0ea5a0;}
+.btn-s{background:var(--elevated);color:var(--t1);border:1px solid var(--border);}
+.btn-s:hover{border-color:var(--accent);color:var(--accent);}
+.btn-d{background:rgba(239,68,68,.1);color:#EF4444;border:1px solid rgba(239,68,68,.2);}
+.btn-d:hover{background:rgba(239,68,68,.2);}
+.btn-sm{padding:5px 10px;font-size:12px;}
+/* FORMS */
+.fg{margin-bottom:16px;}
+.fl{display:block;font-size:12px;font-weight:500;color:var(--t2);margin-bottom:6px;}
+.fc{width:100%;background:var(--elevated);border:1px solid var(--border);border-radius:6px;color:var(--t1);font-family:var(--font);font-size:13px;padding:8px 12px;transition:border-color .15s;outline:none;}
+.fc:focus{border-color:var(--accent);}
+textarea.fc{resize:vertical;line-height:1.5;}
+/* CONF BAR */
+.cbar{display:flex;align-items:center;gap:8px;}
+.ctrack{flex:1;height:4px;background:var(--elevated);border-radius:2px;}
+.cfill{height:100%;border-radius:2px;transition:width .5s ease;}
+.clbl{font-size:11px;font-family:var(--mono);color:var(--t3);min-width:32px;}
+/* TOAST */
+#tc{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+.toast{background:var(--elevated);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;font-size:13px;display:flex;align-items:center;gap:10px;animation:sli .25s ease;min-width:260px;max-width:380px;box-shadow:0 4px 24px rgba(0,0,0,.35);}
+.toast-success{border-left:3px solid var(--success);}
+.toast-error{border-left:3px solid var(--danger);}
+.toast-info{border-left:3px solid var(--blue);}
+@keyframes sli{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+/* SKELETON */
+.sk{background:linear-gradient(90deg,var(--elevated) 25%,var(--card) 50%,var(--elevated) 75%);background-size:200% 100%;animation:shim 1.5s infinite;border-radius:4px;}
+@keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+/* EMPTY */
+.empty{text-align:center;padding:60px 20px;color:var(--t3);}
+.empty svg{width:48px;height:48px;opacity:.3;margin-bottom:16px;}
+.empty h3{font-size:16px;color:var(--t2);margin-bottom:8px;}
+/* UTILS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;}
+.frow{display:flex;gap:12px;align-items:center;}
+.mla{margin-left:auto;}
+.mt16{margin-top:16px;}
+.mt24{margin-top:24px;}
+.mb16{margin-bottom:16px;}
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border-b);border-radius:3px;}
+@media(max-width:900px){.g2,.g3{grid-template-columns:1fr;}.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+</style>
+</head>
+<body id="body">
+<nav id="sb">
+  <div class="sb-logo">
+    <div class="logo-m">IM</div>
+    <div><div class="logo-t">IME</div><div class="logo-s">Maritime Intelligence</div></div>
+  </div>
+  <div style="overflow-y:auto;flex:1;padding-bottom:8px;">
+    <div class="sb-lbl">Command</div>
+    <a href="/" class="ni {% if request.endpoint=='index' %}active{% endif %}">
+      <svg class="ni-ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+      <span class="ni-lb">Command Center</span>
+    </a>
+    <div class="sb-lbl">Intelligence</div>
+    <a href="/email-intelligence" class="ni {% if request.endpoint=='email_intelligence' %}active{% endif %}">
+      <svg class="ni-ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+      <span class="ni-lb">Email Intelligence</span>
+    </a>
+    <a href="/email-processing" class="ni {% if request.endpoint=='email_processing' %}active{% endif %}">
+      <svg class="ni-ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+      <span class="ni-lb">Email Processing</span>
+    </a>
+    <a href="/ml-classifier" class="ni {% if request.endpoint=='ml_classifier' %}active{% endif %}">
+      <svg class="ni-ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
+      <span class="ni-lb">ML Classifier</span><span class="ni-bd">AI</span>
+    </a>
+    <div class="sb-lbl">Database</div>
+    <a href="/tonnage" class="ni {% if request.endpoint=='tonnage' %}active{% endif %}">
+      <svg class="ni-ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+      <span class="ni-lb">Vessel Database</span>
+    </a>
+    <a href="/cargo-vc" class="ni {% if request.endpoint=='cargo_vc' %}active{% endif %}">
+      <svg class="ni-ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+      <span class="ni-lb">Cargo VC</span>
+    </a>
+    <a href="/cargo-tc" class="ni {% if request.endpoint=='cargo_tc' %}active{% endif %}">
+      <svg class="ni-ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      <span class="ni-lb">Cargo TC</span>
+    </a>
+    <div class="sb-lbl">Operations</div>
+    <a href="/match-engine" class="ni {% if request.endpoint=='match_engine' %}active{% endif %}">
+      <svg class="ni-ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+      <span class="ni-lb">Match Engine</span><span class="ni-bd">NEW</span>
+    </a>
+    <a href="/analytics" class="ni {% if request.endpoint=='analytics' %}active{% endif %}">
+      <svg class="ni-ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      <span class="ni-lb">Analytics</span>
+    </a>
+  </div>
+  <div class="sb-foot">
+    <button class="col-btn" onclick="toggleSB()">
+      <svg id="col-ic" class="ni-ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>
+      <span class="ni-lb" style="font-size:12px">Collapse</span>
+    </button>
+  </div>
+</nav>
+<header id="tb">
+  <div><div class="tb-ttl">{% block tb_title %}IME Platform{% endblock %}</div><div class="tb-sub">{% block tb_sub %}Maritime Intelligence{% endblock %}</div></div>
+  <div class="tb-search">
+    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+    <input type="text" placeholder="Search vessels, cargoes, brokers…">
+  </div>
+  <div class="tb-acts">
+    <div class="st-pill"><span class="st-dot"></span>System Online</div>
+    <div class="ic-btn" onclick="seedData()" title="Load Sample Data">
+      <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+    </div>
+    <div class="avatar">CM</div>
+  </div>
+</header>
+<main id="mc">{% block content %}{% endblock %}</main>
+<div id="tc"></div>
+<script>
+function toggleSB(){
+  document.getElementById('sb').classList.toggle('col');
+  document.getElementById('body').classList.toggle('sbc');
+  const ic=document.getElementById('col-ic');
+  if(document.getElementById('sb').classList.contains('col'))
+    ic.innerHTML='<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>';
+  else
+    ic.innerHTML='<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>';
+}
+function toast(msg,type='info'){
+  const c=document.getElementById('tc');
+  const t=document.createElement('div');
+  t.className=`toast toast-${type}`;
+  const icons = {success:'✓',error:'✕',info:'ℹ'};
+  t.innerHTML=`<span style="font-size:15px">${icons[type]||'ℹ'}</span><span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(()=>{t.style.cssText='opacity:0;transform:translateX(120%);transition:all .3s';setTimeout(()=>t.remove(),300);},3500);
+}
+function seedData(){
+  toast('Loading sample maritime emails…','info');
+  fetch('/seed',{method:'POST'}).then(r=>r.json()).then(d=>{toast(d.message||'Data loaded!','success');setTimeout(()=>location.reload(),1200);}).catch(()=>toast('Failed to load data','error'));
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('[data-count]').forEach(el=>{
+    const target=parseInt(el.dataset.count)||0;
+    if(!target)return;
+    let start=0;
+    const step=ts=>{if(!start)start=ts;const p=Math.min((ts-start)/1200,1),e=1-Math.pow(1-p,3);el.textContent=Math.floor(e*target).toLocaleString();if(p<1)requestAnimationFrame(step);};
+    requestAnimationFrame(step);
+  });
+});
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

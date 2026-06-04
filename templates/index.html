@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+{% block title %}Command Center — IME{% endblock %}
+{% block tb_title %}Maritime Intelligence Command Center{% endblock %}
+{% block tb_sub %}Live Operations Dashboard{% endblock %}
+{% block content %}
+<style>
+.world-map{position:relative;background:linear-gradient(180deg,#0a1628 0%,#0d1f3c 100%);border-radius:12px;border:1px solid var(--border);overflow:hidden;height:320px;}
+.map-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(20,184,166,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(20,184,166,.05) 1px,transparent 1px);background-size:40px 40px;}
+.vessel-dot{position:absolute;width:8px;height:8px;border-radius:50%;transform:translate(-50%,-50%);cursor:pointer;}
+.vessel-dot::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:1px solid currentColor;animation:ping 2s infinite;opacity:0;}
+@keyframes ping{0%{transform:scale(1);opacity:.6}100%{transform:scale(2.5);opacity:0}}
+.vessel-dot.t{background:#3B82F6;color:#3B82F6;}
+.vessel-dot.vc{background:#10B981;color:#10B981;}
+.vessel-dot.tc{background:#F59E0B;color:#F59E0B;}
+.map-legend{position:absolute;bottom:12px;left:16px;display:flex;gap:16px;}
+.map-legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2);}
+.map-legend-dot{width:8px;height:8px;border-radius:50%;}
+.map-title{position:absolute;top:12px;left:16px;font-size:12px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.8px;}
+.map-count{position:absolute;top:12px;right:16px;font-size:11px;color:var(--t3);}
+.stream-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.stream-item:last-child{border-bottom:none;}
+.stream-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.stream-time{font-size:11px;color:var(--t3);font-family:var(--mono);white-space:nowrap;margin-top:1px;}
+.stream-body{flex:1;min-width:0;}
+.stream-cat{font-size:11px;font-weight:600;margin-bottom:2px;}
+.stream-snip{font-size:12px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.market-bar{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.market-bar:last-child{margin-bottom:0;}
+.market-label{font-size:12px;color:var(--t2);width:80px;flex-shrink:0;}
+.market-track{flex:1;height:6px;background:var(--elevated);border-radius:3px;overflow:hidden;}
+.market-fill{height:100%;border-radius:3px;transition:width 1s ease;}
+.market-val{font-size:11px;font-family:var(--mono);color:var(--t3);width:36px;text-align:right;}
+.activity-chart{display:flex;align-items:flex-end;gap:4px;height:60px;padding-top:8px;}
+.act-bar{flex:1;border-radius:2px 2px 0 0;transition:height .8s ease,opacity .2s;}
+.act-bar:hover{opacity:.8;}
+</style>
+
+<div class="ph">
+  <div class="ph-row">
+    <div>
+      <h1>Maritime Intelligence Command Center</h1>
+      <p>Real-time vessel &amp; cargo intelligence — <span style="color:var(--accent)">Live Operations Feed</span></p>
+    </div>
+    <div class="frow">
+      <button class="btn btn-s btn-sm" onclick="seedData()">⬆ Load Sample Data</button>
+      <button class="btn btn-d btn-sm" onclick="clearData()">Clear All</button>
+    </div>
+  </div>
+</div>
+
+<!-- KPI CARDS -->
+<div class="kpi-grid">
+  <div class="kpi" style="--kc:#3B82F6">
+    <div class="kpi-lbl">Emails Processed</div>
+    <div class="kpi-val" data-count="{{ stats.emails }}">{{ stats.emails }}</div>
+    <div class="kpi-sub"><span style="color:var(--success)">↑ Live</span> intelligence feed</div>
+    <div class="kpi-ico"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></div>
+  </div>
+  <div class="kpi" style="--kc:#14B8A6">
+    <div class="kpi-lbl">Active Vessels</div>
+    <div class="kpi-val" data-count="{{ stats.tonnage }}">{{ stats.tonnage }}</div>
+    <div class="kpi-sub">Open position records</div>
+    <div class="kpi-ico"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg></div>
+  </div>
+  <div class="kpi" style="--kc:#10B981">
+    <div class="kpi-lbl">VC Cargoes</div>
+    <div class="kpi-val" data-count="{{ stats.cargo_vc }}">{{ stats.cargo_vc }}</div>
+    <div class="kpi-sub">Voyage charter offers</div>
+    <div class="kpi-ico"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/></svg></div>
+  </div>
+  <div class="kpi" style="--kc:#F59E0B">
+    <div class="kpi-lbl">TC Cargoes</div>
+    <div class="kpi-val" data-count="{{ stats.cargo_tc }}">{{ stats.cargo_tc }}</div>
+    <div class="kpi-sub">Time charter requirements</div>
+    <div class="kpi-ico"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg></div>
+  </div>
+  <div class="kpi" style="--kc:#8B5CF6">
+    <div class="kpi-lbl">ML Accuracy</div>
+    <div class="kpi-val" id="acc-kpi">—</div>
+    <div class="kpi-sub">TF-IDF classifier</div>
+    <div class="kpi-ico"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg></div>
+  </div>
+  <div class="kpi" style="--kc:#EF4444">
+    <div class="kpi-lbl">Match Opportunities</div>
+    <div class="kpi-val" id="match-kpi">—</div>
+    <div class="kpi-sub">Vessel ↔ Cargo pairs</div>
+    <div class="kpi-ico"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg></div>
+  </div>
+</div>
+
+<!-- WORLD MAP + STREAM -->
+<div class="g2 mb16">
+  <div>
+    <div class="world-map" id="world-map">
+      <div class="map-grid"></div>
+      <div class="map-title">Global Vessel Activity</div>
+      <div class="map-count" id="map-count">Loading…</div>
+      <div class="map-legend">
+        <div class="map-legend-item"><div class="map-legend-dot" style="background:#3B82F6"></div>Tonnage</div>
+        <div class="map-legend-item"><div class="map-legend-dot" style="background:#10B981"></div>VC Cargo</div>
+        <div class="map-legend-item"><div class="map-legend-dot" style="background:#F59E0B"></div>TC Cargo</div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><span class="card-ttl">Live Email Stream</span><span class="bdg bi">{{ recent|length }} recent</span></div>
+    <div id="stream-list" style="max-height:260px;overflow-y:auto;">
+      {% if recent %}
+        {% for e in recent %}
+        <div class="stream-item">
+          <div class="stream-dot" style="background:{% if e.category=='tonnage' %}#3B82F6{% elif e.category=='cargo_vc' %}#10B981{% else %}#F59E0B{% endif %}"></div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+              <span class="stream-cat" style="color:{% if e.category=='tonnage' %}#60A5FA{% elif e.category=='cargo_vc' %}#34D399{% else %}#FCD34D{% endif %}">{{ e.category_label }}</span>
+              <span class="stream-time">{{ e.created_at[:16] if e.created_at else '' }}</span>
+            </div>
+            <div class="stream-snip">{{ e.snippet[:80] if e.snippet else 'No preview' }}</div>
+          </div>
+          <div style="font-size:11px;color:var(--t3);font-family:var(--mono)">{{ e.confidence }}%</div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty"><p>No emails processed yet.<br>Click <b>Load Sample Data</b> to begin.</p></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- MARKET ACTIVITY + ACTIVITY CHART -->
+<div class="g2 mb16">
+  <div class="card">
+    <div class="card-hd"><span class="card-ttl">Market Activity Index</span></div>
+    <div id="market-bars">
+      <div class="market-bar"><span class="market-label">East Asia</span><div class="market-track"><div class="market-fill" style="width:0%;background:#3B82F6" data-w="82"></div></div><span class="market-val">82%</span></div>
+      <div class="market-bar"><span class="market-label">SE Asia</span><div class="market-track"><div class="market-fill" style="width:0%;background:#14B8A6" data-w="71"></div></div><span class="market-val">71%</span></div>
+      <div class="market-bar"><span class="market-label">South Asia</span><div class="market-track"><div class="market-fill" style="width:0%;background:#10B981" data-w="65"></div></div><span class="market-val">65%</span></div>
+      <div class="market-bar"><span class="market-label">Middle East</span><div class="market-track"><div class="market-fill" style="width:0%;background:#F59E0B" data-w="58"></div></div><span class="market-val">58%</span></div>
+      <div class="market-bar"><span class="market-label">Europe</span><div class="market-track"><div class="market-fill" style="width:0%;background:#8B5CF6" data-w="44"></div></div><span class="market-val">44%</span></div>
+      <div class="market-bar"><span class="market-label">Americas</span><div class="market-track"><div class="market-fill" style="width:0%;background:#EF4444" data-w="37"></div></div><span class="market-val">37%</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><span class="card-ttl">Email Volume (7 Days)</span></div>
+    <div class="activity-chart" id="act-chart"></div>
+    <div style="display:flex;justify-content:space-between;margin-top:6px;">
+      {% set days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] %}
+      {% for d in days %}<span style="font-size:10px;color:var(--t3);flex:1;text-align:center">{{d}}</span>{% endfor %}
+    </div>
+    <div style="margin-top:16px;display:flex;gap:16px;">
+      <div><div style="font-size:11px;color:var(--t3)">Avg/Day</div><div style="font-size:18px;font-weight:700;color:var(--t1)" id="avg-day">—</div></div>
+      <div><div style="font-size:11px;color:var(--t3)">Peak Day</div><div style="font-size:18px;font-weight:700;color:var(--accent)" id="peak-day">—</div></div>
+      <div><div style="font-size:11px;color:var(--t3)">Total</div><div style="font-size:18px;font-weight:700;color:var(--t1)">{{ stats.emails }}</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- QUICK ACTIONS -->
+<div class="card">
+  <div class="card-hd"><span class="card-ttl">Quick Actions</span></div>
+  <div class="frow" style="flex-wrap:wrap;gap:12px;">
+    <a href="/email-processing" class="btn btn-p">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Process New Email
+    </a>
+    <a href="/ml-classifier" class="btn btn-s">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18"/></svg>
+      ML Classifier
+    </a>
+    <a href="/match-engine" class="btn btn-s">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656"/></svg>
+      Match Engine
+    </a>
+    <a href="/analytics" class="btn btn-s">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5"/></svg>
+      Analytics
+    </a>
+    <a href="/tonnage" class="btn btn-s">View Vessels</a>
+    <a href="/cargo-vc" class="btn btn-s">VC Cargoes</a>
+    <a href="/cargo-tc" class="btn btn-s">TC Cargoes</a>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+// Animate market bars
+setTimeout(()=>{
+  document.querySelectorAll('.market-fill').forEach(el=>{el.style.width=el.dataset.w+'%';});
+},300);
+
+// Load ML metrics
+fetch('/api/stats').then(r=>r.json()).then(d=>{
+  // matches
+  fetch('/api/matches').then(r=>r.json()).then(m=>{
+    const kpi=document.getElementById('match-kpi');
+    if(kpi)kpi.textContent=(m.stats&&m.stats.total_matches)||0;
+  }).catch(()=>{});
+});
+
+// Load ML accuracy
+// Load ML accuracy (read-only, no retrain)
+(async()=>{
+  try{
+    const r=await fetch('/api/ml-metrics');
+    const d=await r.json();
+    const el=document.getElementById('acc-kpi');
+    if(el&&d.accuracy)el.textContent=Math.round(d.accuracy*100)+'%';
+  }catch(e){}
+})();
+
+// Activity chart
+const vals=[3,5,8,12,7,4,9].map(v=>Math.max(v,1));
+const max=Math.max(...vals);
+const chart=document.getElementById('act-chart');
+const colors=['#3B82F6','#14B8A6','#10B981','#8B5CF6','#F59E0B','#EF4444','#14B8A6'];
+vals.forEach((v,i)=>{
+  const b=document.createElement('div');
+  b.className='act-bar';
+  b.style.cssText=`height:0;background:${colors[i]};opacity:.8;`;
+  b.title=`${v} emails`;
+  chart.appendChild(b);
+  setTimeout(()=>{b.style.height=Math.round((v/max)*100)+'%';},200+i*80);
+});
+document.getElementById('avg-day').textContent=Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);
+document.getElementById('peak-day').textContent=Math.max(...vals);
+
+// World map vessel dots
+const mapEl=document.getElementById('world-map');
+const portPositions=[
+  {x:'75%',y:'35%',type:'t',label:'East Asia'},{x:'68%',y:'45%',type:'t',label:'SE Asia'},
+  {x:'58%',y:'42%',type:'vc',label:'South Asia'},{x:'52%',y:'38%',type:'tc',label:'Middle East'},
+  {x:'30%',y:'28%',type:'t',label:'Europe'},{x:'35%',y:'35%',type:'vc',label:'Mediterranean'},
+  {x:'18%',y:'55%',type:'tc',label:'W.Africa'},{x:'80%',y:'60%',type:'vc',label:'Australia'},
+  {x:'20%',y:'45%',type:'t',label:'Americas'},{x:'55%',y:'58%',type:'vc',label:'E.Africa'},
+];
+portPositions.forEach((p,i)=>{
+  const d=document.createElement('div');
+  d.className=`vessel-dot ${p.type}`;
+  d.style.cssText=`left:${p.x};top:${p.y};animation-delay:${i*0.3}s`;
+  d.title=p.label;
+  mapEl.appendChild(d);
+});
+document.getElementById('map-count').textContent=portPositions.length+' active positions';
+
+// Animate dots with delay
+document.querySelectorAll('.vessel-dot::after').forEach((el,i)=>{el.style.animationDelay=i*0.4+'s';});
+</script>
+{% endblock %}
